@@ -12,11 +12,7 @@ type LoginService struct {
 	client *wygop.WykopClient
 }
 
-func CreateLoginService(client *wygop.WykopClient) *LoginService {
-	return &LoginService{client}
-}
-
-func (s *LoginService) Index(accountkey string) (*responses.Profile, error) {
+func (s *LoginService) Index(accountkey string) (*responses.LoginResult, error) {
 	body := url.Values{}
 	body.Add("accountkey", accountkey)
 	response, err := s.client.Post("login/index", &body)
@@ -24,7 +20,7 @@ func (s *LoginService) Index(accountkey string) (*responses.Profile, error) {
 		return nil, err
 	}
 
-	var loginResult responses.Profile
+	var loginResult responses.LoginResult
 
 	err = json.Unmarshal(response.Data, &loginResult)
 	if err != nil {
