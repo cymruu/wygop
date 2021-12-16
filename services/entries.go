@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/cymruu/wygop"
 	"github.com/cymruu/wygop/responses"
@@ -27,8 +28,8 @@ func (s *EntryService) Stream() ([]responses.Entry, error) {
 	return entries, nil
 }
 
-func (s *EntryService) Entry(entryId int64) (*responses.Entry, error) {
-	response, err := s.client.Get("entries/stream")
+func (s *EntryService) Entry(entryId uint64) (*responses.Entry, error) {
+	response, err := s.client.Get(fmt.Sprintf("entries/entry/%d", entryId))
 	if err != nil {
 		return nil, err
 	}
