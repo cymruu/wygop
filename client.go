@@ -90,8 +90,6 @@ func (c *WykopClient) createURL(endpoint string) string {
 }
 
 func (c *WykopClient) sendRequest(request *http.Request) (*responses.APIResponse, error) {
-	fmt.Println("sign", request.Header.Get("apisign"))
-
 	res, err := c.httpClient.Do(request)
 	if err != nil {
 		return nil, err
