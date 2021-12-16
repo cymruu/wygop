@@ -77,9 +77,12 @@ func (c *WykopClient) signRequest(request *http.Request, body *url.Values) {
 		for _, k := range sortedKeys {
 			hashPayload += body.Get(k) + ","
 		}
+		if len(sortedKeys) > 0 {
+			hashPayload = hashPayload[:len(hashPayload)-1]
+		}
 	}
 
-	signBytes := md5.Sum([]byte(hashPayload)[:len(hashPayload)-1])
+	signBytes := md5.Sum([]byte(hashPayload))
 	request.Header.Add("apisign", fmt.Sprintf("%x", signBytes))
 }
 
