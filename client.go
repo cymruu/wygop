@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 
 	"github.com/cymruu/wygop/responses"
@@ -32,17 +33,34 @@ func CreateClient(appkey, secret string, client *http.Client) *WykopClient {
 	}
 }
 
+func (c *WykopClient) Login(accountkey string) (*responses.APIResponse, error) {
+	body := url.Values{}
+	body.Add("accountkey", accountkey)
+	response, err := c.Post("login/index", &body)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
 func (c *WykopClient) Post(endpoint string, body *url.Values) (*responses.APIResponse, error) {
-	url := c.createURL(endpoint)
-	request, _ := http.NewRequest("POST", url, strings.NewReader(body.Encode()))
+	endpointUrl := c.createURL(endpoint)
+	request, err := http.NewRequest("POST", endpointUrl, strings.NewReader(body.Encode()))
+	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	if err != nil {
+		return nil, err
+	}
+
 	c.signRequest(request, body)
 
 	return c.sendRequest(request)
 }
 
 func (c *WykopClient) Get(endpoint string) (*responses.APIResponse, error) {
-	url := c.createURL(endpoint)
-	request, _ := http.NewRequest("GET", url, nil)
+	endpointUrl := c.createURL(endpoint)
+	request, _ := http.NewRequest("GET", endpointUrl, nil)
 	c.signRequest(request, nil)
 
 	return c.sendRequest(request)
@@ -51,13 +69,18 @@ func (c *WykopClient) Get(endpoint string) (*responses.APIResponse, error) {
 func (c *WykopClient) signRequest(request *http.Request, body *url.Values) {
 	hashPayload := c.secret + request.URL.String()
 	if body != nil {
-		for _, v := range *body {
-			hashPayload += v[0] + ","
+		sortedKeys := make([]string, 0)
+		for k := range *body {
+			sortedKeys = append(sortedKeys, k)
 		}
-		hashPayload = hashPayload[:len(hashPayload)-1]
+		sort.Strings(sortedKeys)
+		for _, k := range sortedKeys {
+			hashPayload += body.Get(k) + ","
+		}
 	}
-	apisign := md5.Sum([]byte(hashPayload))
-	request.Header.Add("apisign", fmt.Sprintf("%x", apisign))
+
+	signBytes := md5.Sum([]byte(hashPayload)[:len(hashPayload)-1])
+	request.Header.Add("apisign", fmt.Sprintf("%x", signBytes))
 }
 
 func (c *WykopClient) createURL(endpoint string) string {
@@ -67,6 +90,8 @@ func (c *WykopClient) createURL(endpoint string) string {
 }
 
 func (c *WykopClient) sendRequest(request *http.Request) (*responses.APIResponse, error) {
+	fmt.Println("sign", request.Header.Get("apisign"))
+
 	res, err := c.httpClient.Do(request)
 	if err != nil {
 		return nil, err
