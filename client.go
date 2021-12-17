@@ -60,7 +60,7 @@ func (c *WykopClient) CreateRequest(endpoint string, requestOptions ...RequestOp
 	}
 	namedParams["appkey"] = c.appkey
 
-	return CreateRequest(endpoint, SetNamedParams(namedParams))
+	return CreateRequest(endpoint, append(requestOptions, SetNamedParams(namedParams))...)
 }
 
 func (c *WykopClient) SendRequest(wykopRequest *WykopRequest) (*responses.APIResponse, error) {
@@ -68,7 +68,10 @@ func (c *WykopClient) SendRequest(wykopRequest *WykopRequest) (*responses.APIRes
 	if err != nil {
 		return nil, err
 	}
-	c.signRequest(request, wykopRequest.body)
+	c.signRequest(request, &wykopRequest.body)
+	if wykopRequest.body != nil {
+		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	}
 
 	res, err := c.httpClient.Do(request)
 	if err != nil {
