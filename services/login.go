@@ -28,5 +28,6 @@ func (s *LoginService) Index(accountkey string) (*responses.LoginResult, error) 
 		return nil, err
 	}
 
+	s.client.SetUserkey(loginResult.UserKey)
 	return &loginResult, nil
 }

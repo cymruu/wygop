@@ -18,8 +18,7 @@ type WykopClient struct {
 
 	httpClient *http.Client
 
-	username   *string
-	accountkey *string
+	userkey *string
 }
 
 func CreateClient(appkey, secret string, client *http.Client) *WykopClient {
@@ -27,9 +26,11 @@ func CreateClient(appkey, secret string, client *http.Client) *WykopClient {
 		appkey:     appkey,
 		secret:     secret,
 		httpClient: client,
-		username:   new(string),
-		accountkey: new(string),
 	}
+}
+
+func (c *WykopClient) SetUserkey(userkey string) {
+	c.userkey = &userkey
 }
 
 func (c *WykopClient) signRequest(request *http.Request, body *url.Values) {
@@ -53,7 +54,13 @@ func (c *WykopClient) signRequest(request *http.Request, body *url.Values) {
 }
 
 func (c *WykopClient) CreateRequest(endpoint string, requestOptions ...RequestOptional) *WykopRequest {
-	return CreateRequest("login/index", requestOptions...)
+	namedParams := make(namedParams)
+	if c.userkey != nil {
+		namedParams["userkey"] = *c.userkey
+	}
+	namedParams["appkey"] = c.appkey
+
+	return CreateRequest(endpoint, SetNamedParams(namedParams))
 }
 
 func (c *WykopClient) SendRequest(wykopRequest *WykopRequest) (*responses.APIResponse, error) {
