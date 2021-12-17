@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
-	"strings"
 
 	"github.com/cymruu/wygop/responses"
 )
@@ -33,39 +32,6 @@ func CreateClient(appkey, secret string, client *http.Client) *WykopClient {
 	}
 }
 
-func (c *WykopClient) Login(accountkey string) (*responses.APIResponse, error) {
-	body := url.Values{}
-	body.Add("accountkey", accountkey)
-	response, err := c.Post("login/index", &body)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
-func (c *WykopClient) Post(endpoint string, body *url.Values) (*responses.APIResponse, error) {
-	endpointUrl := c.createURL(endpoint)
-	request, err := http.NewRequest("POST", endpointUrl, strings.NewReader(body.Encode()))
-	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	if err != nil {
-		return nil, err
-	}
-
-	c.signRequest(request, body)
-
-	return c.sendRequest(request)
-}
-
-func (c *WykopClient) Get(endpoint string) (*responses.APIResponse, error) {
-	endpointUrl := c.createURL(endpoint)
-	request, _ := http.NewRequest("GET", endpointUrl, nil)
-	c.signRequest(request, nil)
-
-	return c.sendRequest(request)
-}
-
 func (c *WykopClient) signRequest(request *http.Request, body *url.Values) {
 	hashPayload := c.secret + request.URL.String()
 	if body != nil {
@@ -86,13 +52,17 @@ func (c *WykopClient) signRequest(request *http.Request, body *url.Values) {
 	request.Header.Add("apisign", fmt.Sprintf("%x", signBytes))
 }
 
-func (c *WykopClient) createURL(endpoint string) string {
-	url := fmt.Sprintf("https://a2.wykop.pl/%s/appkey/%s", endpoint, c.appkey)
-
-	return url
+func (c *WykopClient) CreateRequest(endpoint string, requestOptions ...RequestOptional) *WykopRequest {
+	return CreateRequest("login/index", requestOptions...)
 }
 
-func (c *WykopClient) sendRequest(request *http.Request) (*responses.APIResponse, error) {
+func (c *WykopClient) SendRequest(wykopRequest *WykopRequest) (*responses.APIResponse, error) {
+	request, err := wykopRequest.createHTTPRequest()
+	if err != nil {
+		return nil, err
+	}
+	c.signRequest(request, wykopRequest.body)
+
 	res, err := c.httpClient.Do(request)
 	if err != nil {
 		return nil, err

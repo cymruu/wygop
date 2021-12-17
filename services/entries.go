@@ -13,7 +13,7 @@ type EntryService struct {
 }
 
 func (s *EntryService) Stream() ([]responses.Entry, error) {
-	response, err := s.client.Get("entries/stream")
+	response, err := s.client.SendRequest(s.client.CreateRequest("entries/stream"))
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (s *EntryService) Stream() ([]responses.Entry, error) {
 }
 
 func (s *EntryService) Entry(entryId uint64) (*responses.Entry, error) {
-	response, err := s.client.Get(fmt.Sprintf("entries/entry/%d", entryId))
+	response, err := s.client.SendRequest(s.client.CreateRequest(fmt.Sprintf("entries/entry/%d", entryId)))
 	if err != nil {
 		return nil, err
 	}
