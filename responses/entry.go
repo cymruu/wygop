@@ -2,7 +2,7 @@ package responses
 
 type Entry struct {
 	ID            uint64         `json:"id"`
-	Date          string         `json:"date"`
+	Date          APITime        `json:"date"`
 	Body          string         `json:"body"`
 	Author        Author         `json:"author"`
 	Blocked       bool           `json:"blocked"`
@@ -20,7 +20,7 @@ type Entry struct {
 type EntryComment struct {
 	ID           uint64  `json:"id"`
 	Author       Author  `json:"author"`
-	Date         string  `json:"date"`
+	Date         APITime `json:"date"`
 	Body         string  `json:"body"`
 	Blocked      bool    `json:"blocked"`
 	Favorite     bool    `json:"favorite"`
