@@ -19,6 +19,8 @@ type WykopClient struct {
 	httpClient *http.Client
 
 	userkey *string
+
+	RequestOptions []RequestOptional
 }
 
 func CreateClient(appkey, secret string, client *http.Client) *WykopClient {
@@ -53,14 +55,19 @@ func (c *WykopClient) signRequest(request *http.Request, body *url.Values) {
 	request.Header.Add("apisign", fmt.Sprintf("%x", signBytes))
 }
 
-func (c *WykopClient) CreateRequest(endpoint string, requestOptions ...RequestOptional) *WykopRequest {
-	namedParams := make(namedParams)
+func (c *WykopClient) CreateRequest(endpoint string, options ...RequestOptional) *WykopRequest {
+	authParams := make(namedParams)
 	if c.userkey != nil {
-		namedParams["userkey"] = *c.userkey
+		authParams["userkey"] = *c.userkey
 	}
-	namedParams["appkey"] = c.appkey
+	authParams["appkey"] = c.appkey
 
-	return CreateRequest(endpoint, append(requestOptions, SetNamedParams(namedParams))...)
+	authOptions := SetNamedParams(authParams)
+	requestOptions := c.RequestOptions
+	requestOptions = append(requestOptions, options...)
+	requestOptions = append(requestOptions, authOptions)
+
+	return CreateRequest(endpoint, requestOptions...)
 }
 
 func (c *WykopClient) SendRequest(wykopRequest *WykopRequest) (*responses.APIResponse, error) {
