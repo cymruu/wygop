@@ -46,7 +46,7 @@ func (s *EntryService) Entry(entryId uint64) (*responses.Entry, error) {
 }
 
 func (s *EntryService) Add(body *url.Values) (*responses.Entry, error) {
-	request := s.client.CreateRequest("entries/add", wygop.SetPostBody(body))
+	request := s.client.CreateRequest("entries/add", wygop.WithPostBody(body))
 
 	response, err := s.client.SendRequest(request)
 	if err != nil {

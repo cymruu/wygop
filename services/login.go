@@ -15,7 +15,7 @@ type LoginService struct {
 func (s *LoginService) Index(accountkey string) (*responses.LoginResult, error) {
 	body := url.Values{}
 	body.Add("accountkey", accountkey)
-	request := s.client.CreateRequest("login/index", wygop.SetPostBody(&body))
+	request := s.client.CreateRequest("login/index", wygop.WithPostBody(&body))
 	response, err := s.client.SendRequest(request)
 	if err != nil {
 		return nil, err

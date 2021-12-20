@@ -10,7 +10,7 @@ import (
 
 type apiParams = []string
 type namedParams = map[string]string
-type RequestOptional func(*WykopRequest)
+type WykopRequestOption func(*WykopRequest)
 
 type WykopRequest struct {
 	endpoint    string
@@ -19,7 +19,7 @@ type WykopRequest struct {
 	body        url.Values
 }
 
-func CreateRequest(endpoint string, options ...RequestOptional) *WykopRequest {
+func CreateRequest(endpoint string, options ...WykopRequestOption) *WykopRequest {
 	request := &WykopRequest{
 		endpoint:    endpoint,
 		apiParams:   make([]string, 0),
@@ -33,13 +33,13 @@ func CreateRequest(endpoint string, options ...RequestOptional) *WykopRequest {
 	return request
 }
 
-func SetApiParams(v apiParams) RequestOptional {
+func WithApiParams(v apiParams) WykopRequestOption {
 	return func(r *WykopRequest) {
 		r.apiParams = append(r.apiParams, v...)
 	}
 }
 
-func SetNamedParams(params namedParams) RequestOptional {
+func WithNamedParams(params namedParams) WykopRequestOption {
 	return func(r *WykopRequest) {
 		for k, v := range params {
 			r.namedParams[k] = v
@@ -47,7 +47,7 @@ func SetNamedParams(params namedParams) RequestOptional {
 	}
 }
 
-func SetPostBody(values *url.Values) RequestOptional {
+func WithPostBody(values *url.Values) WykopRequestOption {
 	return func(r *WykopRequest) {
 		for k, v := range *values {
 			r.body[k] = v
@@ -62,7 +62,7 @@ func (req *WykopRequest) getRequestMethod() string {
 	return "GET"
 }
 
-func (req *WykopRequest) createHTTPRequest() (*http.Request, error) {
+func (req *WykopRequest) toHTTPRequest() (*http.Request, error) {
 	URL := fmt.Sprintf("https://a2.wykop.pl/%s", req.endpoint)
 
 	URL += fmt.Sprintf("%s/", strings.Join(req.apiParams, "/"))
