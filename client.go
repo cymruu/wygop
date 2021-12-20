@@ -1,6 +1,7 @@
 package wygop
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
@@ -70,8 +71,8 @@ func (c *WykopClient) CreateRequest(endpoint string, options ...WykopRequestOpti
 	return CreateRequest(endpoint, requestOptions...)
 }
 
-func (c *WykopClient) SendRequest(wykopRequest *WykopRequest) (*responses.APIResponse, error) {
-	request, err := wykopRequest.toHTTPRequest()
+func (c *WykopClient) SendRequest(ctx context.Context, wykopRequest *WykopRequest) (*responses.APIResponse, error) {
+	request, err := wykopRequest.toHTTPRequest(ctx)
 	if err != nil {
 		return nil, err
 	}

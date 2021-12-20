@@ -1,6 +1,7 @@
 package wygop
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -62,7 +63,7 @@ func (req *WykopRequest) getRequestMethod() string {
 	return "GET"
 }
 
-func (req *WykopRequest) toHTTPRequest() (*http.Request, error) {
+func (req *WykopRequest) toHTTPRequest(ctx context.Context) (*http.Request, error) {
 	URL := fmt.Sprintf("https://a2.wykop.pl/%s", req.endpoint)
 
 	URL += fmt.Sprintf("%s/", strings.Join(req.apiParams, "/"))
@@ -78,7 +79,8 @@ func (req *WykopRequest) toHTTPRequest() (*http.Request, error) {
 		body = strings.NewReader(req.body.Encode())
 	}
 
-	return http.NewRequest(
+	return http.NewRequestWithContext(
+		ctx,
 		method,
 		URL,
 		body,

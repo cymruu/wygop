@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"net/url"
 
@@ -12,11 +13,11 @@ type LoginService struct {
 	client *wygop.WykopClient
 }
 
-func (s *LoginService) Index(accountkey string) (*responses.LoginResult, error) {
+func (s *LoginService) Index(ctx context.Context, accountkey string) (*responses.LoginResult, error) {
 	body := url.Values{}
 	body.Add("accountkey", accountkey)
 	request := s.client.CreateRequest("login/index", wygop.WithPostBody(&body))
-	response, err := s.client.SendRequest(request)
+	response, err := s.client.SendRequest(ctx, request)
 	if err != nil {
 		return nil, err
 	}
