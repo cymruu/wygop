@@ -18,17 +18,18 @@ type Entry struct {
 }
 
 type EntryComment struct {
-	ID           uint64  `json:"id"`
-	Author       Author  `json:"author"`
-	Date         APITime `json:"date"`
-	Body         string  `json:"body"`
-	Blocked      bool    `json:"blocked"`
-	Favorite     bool    `json:"favorite"`
-	VoteCount    uint32  `json:"vote_count"`
-	Status       string  `json:"status"`
-	UserVote     uint8   `json:"user_vote"`
-	ViolationURL string  `json:"violation_url"`
-	App          *string `json:"app,omitempty"`
+	ID           uint64      `json:"id"`
+	Author       Author      `json:"author"`
+	Date         APITime     `json:"date"`
+	Body         string      `json:"body"`
+	Blocked      bool        `json:"blocked"`
+	Favorite     bool        `json:"favorite"`
+	VoteCount    uint32      `json:"vote_count"`
+	Status       string      `json:"status"`
+	Embed        *EntryEmbed `json:"embed,omitempty"`
+	UserVote     uint8       `json:"user_vote"`
+	ViolationURL string      `json:"violation_url"`
+	App          *string     `json:"app,omitempty"`
 }
 
 type EntryEmbed struct {
